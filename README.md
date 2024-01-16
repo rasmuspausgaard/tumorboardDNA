@@ -52,6 +52,8 @@ Analyze the cases in samplesheet.txt, starting with Fastq files, use only files 
     --fastq               Path to dir with fastq files
                               Default: data storage dirs at lnx01 server or kga01 server
   
-    --cram               Path to dir with CRAM files
+    --cram                Path to dir with CRAM files
   
     --fastqInput          Use Fastq as input, search the archive location for the relevant files for the samples in the samplesheet
+
+    --skipQC              Do not run QC module
