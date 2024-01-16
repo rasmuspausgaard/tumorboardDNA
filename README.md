@@ -22,7 +22,7 @@ Analyze the cases in samplesheet.txt, starting with CRAM files, let the script f
 
         nextflow run KGVejle/tumorboardDNA -r main --samplesheet /path/to/samplesheet.txt
 
-Analyze the cases in samplesheet.txt, starting with CRAM files, use only files in specific folder:
+Analyze the cases in samplesheet.txt, starting with CRAM files, manually select folder with input data (CRAM):
 
         nextflow run KGVejle/tumorboardDNA -r main --samplesheet /path/to/samplesheet.txt --cram /path/to/cramfolder/
 
@@ -30,7 +30,7 @@ Analyze the cases in samplesheet.txt, starting with Fastq files, let the script 
 
         nextflow run KGVejle/tumorboardDNA -r main --samplesheet /path/to/samplesheet.txt --fastqInput
 
-Analyze the cases in samplesheet.txt, starting with Fastq files, use only files in the specific folder:
+Analyze the cases in samplesheet.txt, starting with Fastq files, manually select folder with input data (Fastq):
 
         nextflow run KGVejle/tumorboardDNA -r main --samplesheet /path/to/samplesheet.txt --fastq /path/to/fastqfolder/
 
