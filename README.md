@@ -64,35 +64,35 @@ Analyze the cases in samplesheet.txt, starting with Fastq files, use only files 
 ## PCGR tumor codes:
 
 PCGR tumor types:
-                1 = Adrenal Gland
-                2 = Ampulla of Vater
-                3 = Biliary Tract
-                4 = Bladder/Urinary Tract
-                5 = Bone
-                6 = Breast
-                7 = Cervix
-                8 = CNS/Brain
-                9 = Colon/Rectum
-                10 = Esophagus/Stomach
-                11 = Eye
-                12 = Head and Neck
-                13 = Kidney
-                14 = Liver
-                15 = Lung
-                16 = Lymphoid
-                17 = Myeloid
-                18 = Ovary/Fallopian Tube
-                19 = Pancreas
-                20 = Peripheral Nervous System
-                21 = Peritoneum
-                22 = Pleura
-                23 = Prostate
-                24 = Skin
-                25 = Soft Tissue
-                26 = Testis
-                27 = Thymus
-                28 = Thyroid
-                29 = Uterus
-                30 = Vulva/Vagina
+1 = Adrenal Gland
+2 = Ampulla of Vater
+3 = Biliary Tract
+4 = Bladder/Urinary Tract
+5 = Bone
+6 = Breast
+7 = Cervix
+8 = CNS/Brain
+9 = Colon/Rectum
+10 = Esophagus/Stomach
+11 = Eye
+12 = Head and Neck
+13 = Kidney
+14 = Liver
+15 = Lung
+16 = Lymphoid
+17 = Myeloid
+18 = Ovary/Fallopian Tube
+19 = Pancreas
+20 = Peripheral Nervous System
+21 = Peritoneum
+22 = Pleura
+23 = Prostate
+24 = Skin
+25 = Soft Tissue
+26 = Testis
+27 = Thymus
+28 = Thyroid
+29 = Uterus
+30 = Vulva/Vagina
 
 
