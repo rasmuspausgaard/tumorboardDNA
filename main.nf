@@ -292,7 +292,7 @@ workflow DNA_TUMOR_NORMAL {
 
 
 workflow {
-    if (params.fastqInput) {
+    if (params.fastqInput || params.fastq) {
 
         SUB_DNA_PREPROCESS(case_fastq_input_ch)
         
@@ -316,7 +316,7 @@ workflow {
         SUB_DNA_TUMOR_NORMAL(tumorNormal_bam_ch, caseID_pcgrID)
     }
 
-    if (!params.fastqInput) {
+    if !(params.fastqInput || params.fastq) {
         inputFiles_symlinks_cram(case_npn_cram_crai_ch)
         tb_haplotypecaller(case_npn_cram_crai_ch)  // caseid, npn, cram, crai, type
         tb_cram_bam(case_npn_cram_crai_ch)
