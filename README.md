@@ -1,6 +1,6 @@
 # KG Vejle TumorBoard DNA script
 
-Generel info:
+## Generel info:
 Requires a samplesheet containing 5 columns in specific order (tab separated), without headerline:
 1) caseID, 2) NPN normal WES, 3) NPN tumor WES, 4) NPN tumor RNA, 5) PCGR tumor value
 
@@ -11,11 +11,30 @@ Example samplesheet:
 The script will automatically look for fastq or cram files in subfolders at /lnx01_data2/shared/dataArchive/. This location contains read-only access to the data archive, containing all FastQ files. Theres no need to copy or move any input data.
 
 The user can point to a specific folder containing input data using the --fastq or --cram option 
-This is only needed if input data only exists outside the data archive (e.g. if data are in personal folders).
 
-Usage:
+This is only needed if input data only exists outside the data archive (e.g. if data are in personal folders or e.g. stored at other KG Vejle servers).
 
-Main options:
+## Usage examples:
+
+Analyze the cases in samplesheet.txt, starting with CRAM files, let the script find the relevant files:
+
+        nextflow run KGVejle/tumorboardDNA -r main --samplesheet /path/to/samplesheet.txt
+
+Analyze the cases in samplesheet.txt, starting with CRAM files, use only files in specific folder:
+
+        nextflow run KGVejle/tumorboardDNA -r main --samplesheet /path/to/samplesheet.txt --cram /path/to/cramfolder/
+
+Analyze the cases in samplesheet.txt, starting with Fastq files, let the script find the relevant fastqfiles at the archive:
+
+        nextflow run KGVejle/tumorboardDNA -r main --samplesheet /path/to/samplesheet.txt --fastqInput
+
+Analyze the cases in samplesheet.txt, starting with Fastq files, use only files in the specific folder:
+
+        nextflow run KGVejle/tumorboardDNA -r main --samplesheet /path/to/samplesheet.txt --fastq /path/to/fastqfolder/
+
+
+
+## Main options:
 
     --help                print this help message
     
