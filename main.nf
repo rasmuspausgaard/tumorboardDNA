@@ -269,8 +269,9 @@ include {
          SUB_DNA_PREPROCESS;
          SUB_DNA_QC;
          SUB_DNA_TUMOR_NORMAL
-        } from "./modules/tumorBoard.modules.v1.nf" 
+        } from "/data/shared/analyseScripts/modules/tumorBoard.modules.v1.nf" 
 
+//from "./modules/tumorBoard.modules.v1.nf"
 
 
 workflow DNA_TUMOR_NORMAL {
