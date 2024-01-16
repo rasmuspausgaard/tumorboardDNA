@@ -257,8 +257,6 @@ runID       : $date.$user
 """
 
 
-
-
  //   {msisensor_input; mutect2_input; sequenza_input; accucopy_input;tumor_normal_bams4;facets_input}
 
 
@@ -269,8 +267,7 @@ include {
          tb_haplotypecaller;
          SUB_DNA_PREPROCESS;
          SUB_DNA_QC;
-         SUB_DNA_TUMOR_NORMAL
-        } from "/data/shared/analyseScripts/modules/tumorBoard.modules.v1.nf" 
+         SUB_DNA_TUMOR_NORMAL } from "/data/shared/analyseScripts/modules/tumorBoard.modules.v1.nf" 
 
 //from "./modules/tumorBoard.modules.v1.nf"
 
@@ -317,7 +314,7 @@ workflow {
         SUB_DNA_TUMOR_NORMAL(tumorNormal_bam_ch, caseID_pcgrID)
     }
 
-    if !(params.fastqInput || params.fastq) {
+    if (!params.fastqInput && !params.fastq) {
         inputFiles_symlinks_cram(case_npn_cram_crai_ch)
         tb_haplotypecaller(case_npn_cram_crai_ch)  // caseid, npn, cram, crai, type
         tb_cram_bam(case_npn_cram_crai_ch)
