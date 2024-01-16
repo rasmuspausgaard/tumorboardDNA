@@ -4,6 +4,7 @@
 Requires a samplesheet containing 5 columns in specific order (tab separated), without headerline:
 1) caseID, 2) NPN normal WES, 3) NPN tumor WES, 4) NPN tumor RNA, 5) PCGR tumor value
 
+
 The PCGR tumorcodes can be found at the end of this readme.
 
 Example samplesheet:
