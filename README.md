@@ -16,6 +16,7 @@ This is only needed if input data only exists outside the data archive (e.g. if 
 Usage:
 
 Main options:
+
   --help                print this help message
   
   --genome              hg19 or hg38
