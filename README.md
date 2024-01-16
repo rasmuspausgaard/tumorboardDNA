@@ -96,4 +96,3 @@ Analyze the cases in samplesheet.txt, starting with Fastq files, manually select
     29 = Uterus
     30 = Vulva/Vagina
 
-
