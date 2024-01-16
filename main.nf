@@ -30,7 +30,6 @@ params.gatk                             ="new"
 runtype = "TN_WES"
 
 
-
 switch (params.server) {
     case 'lnx01':
         modules_dir="/home/mmaj/scripts_lnx01/nextflow_lnx01/dsl2/modules";
@@ -83,6 +82,8 @@ def helpMessage() {
 
       --fastq               Path to dir with fastq files
                                 Default: data storage dirs at lnx01 server or kga01 server
+
+      --fastqInput          Use Fastq as input, automatically search for relevant fastq files at KG Vejle data archive
 
     """.stripIndent()
 }
