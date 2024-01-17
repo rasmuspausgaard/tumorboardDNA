@@ -19,7 +19,7 @@ This is only needed if input data only exists outside the data archive (e.g. if 
 
 ## Usage examples:
 
-Analyze the cases in samplesheet.txt, starting with CRAM files, let the script find the relevant files:
+Analyze the cases in samplesheet.txt, starting with CRAM files, let the script find the relevant files at the archive:
 
         nextflow run KGVejle/tumorboardDNA -r main --samplesheet /path/to/samplesheet.txt
 
