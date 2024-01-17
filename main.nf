@@ -82,6 +82,8 @@ def helpMessage() {
 
       --fastqInput          Use Fastq as input, automatically search for relevant fastq files at KG Vejle data archive
 
+      --skipQC              Skip QC module
+      
     """.stripIndent()
 }
 if (params.help) exit 0, helpMessage()
