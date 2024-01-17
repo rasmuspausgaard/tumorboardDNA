@@ -15,7 +15,7 @@ The script will automatically look for fastq or cram files in subfolders at /lnx
 
 The user can point to a specific folder containing input data using the --fastq or --cram option 
 
-This is only needed if input data only exists outside the data archive (e.g. if data are in personal folders or e.g. stored at other KG Vejle servers).
+This is only needed if input data exists outside the data archive (e.g. if data are in personal folders or stored at other KG Vejle servers).
 
 ## Usage examples:
 
