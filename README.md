@@ -11,9 +11,9 @@ Example samplesheet:
 
     johnDoe 112217976652	111184925465	111184925473    23
 
-The script will automatically look for fastq or cram files in subfolders at /lnx01_data2/shared/dataArchive/. This location contains read-only access to the data archive, containing all FastQ files. Theres no need to copy or move any input data.
+The script will automatically look for fastq or cram files in subfolders at /lnx01_data2/shared/dataArchive/. This location contains read-only access to the data archive. Theres no need to copy or move any input data.
 
-The user can point to a specific folder containing input data using the --fastq or --cram option 
+The user can point to a specific folder containing input data using the --fastq or --cram option. 
 
 This is only needed if input data exists outside the data archive (e.g. if data are in personal folders or stored at other KG Vejle servers).
 

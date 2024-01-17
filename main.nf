@@ -53,13 +53,11 @@ def helpMessage() {
 
     johnDoe 112217976652	111184925465	111184925473    23
 
-    The script will automatically look for fastq or ubam files in subfolders at /lnx01_data2/shared/dataArchive/. This location contains read-only access to the data archive, containing all FastQ files. Theres no need to copy or move any raw data (FastQ or uBAM).
+    The script will automatically look for fastq or cram files in subfolders at /lnx01_data2/shared/dataArchive/. This location contains read-only access to the data archive. Theres no need to copy or move any input data.
 
-    The user can point to a specific folder containing raw data (FastQ) using the --fastq option 
-    This is only needed if raw data only exists outside the data archive (e.g. if data are in personal folders).
-    
-    NEW ANALYSIS SETUP: UMI pipeline using the --umibam option.
-    using the --umibam option, the user can point to a folder containing unmapped bam (uBAM) files. This analysis uses the UMI information to generate consensus reads based on the UMIs. The UMI pipeline does not use fastq files at all.
+    The user can point to a specific folder containing input data using the --fastq or --cram option. 
+
+    This is only needed if input data exists outside the data archive (e.g. if data are in personal folders or stored at other KG Vejle servers).
 
     Usage:
 
@@ -82,8 +80,8 @@ def helpMessage() {
 
       --fastqInput          Use Fastq as input, automatically search for relevant fastq files at KG Vejle data archive
 
-      --skipQC              Skip QC module
-      
+      --skipQC              Do not run QC module
+
     """.stripIndent()
 }
 if (params.help) exit 0, helpMessage()
