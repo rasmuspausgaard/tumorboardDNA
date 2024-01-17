@@ -19,7 +19,6 @@ params.help                             =false
 params.pcgr_tumor                       =null
 params.qualimap                         =null
 params.samplesheet                      =null
-params.jointgeno                        =null
 params.hg38v1                           =null
 params.hg38v2                           =null
 params.skipQC                           =null
