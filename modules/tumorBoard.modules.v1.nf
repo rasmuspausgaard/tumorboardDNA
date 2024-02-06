@@ -223,7 +223,7 @@ process inputFiles_symlinks_fq{
 
 process inputFiles_symlinks_cram{
     errorStrategy 'ignore'
-    publishDir "${caseID}/${params.outdir}/cram_symlinks/", mode: 'link', pattern: '*.{ba,cr}*'
+    publishDir "${caseID}/${params.outdir}/cram_TN_symlinks/", mode: 'link', pattern: '*.{ba,cr}*'
     input:
 
     tuple val(caseID), val(sampleID), path(cram), path(crai),val(type)    
@@ -231,6 +231,8 @@ process inputFiles_symlinks_cram{
     tuple path(cram),path(crai)
     script:
     """
+    mv ${cram} ${sampleID}.${type}.${params.genome}.${genome_version}.BWA.MD.symedit.cram
+    mv ${crai} ${sampleID}.${type}.${params.genome}.${genome_version}.BWA.MD.symedit.cram.crai
     """
 }
 
@@ -381,7 +383,7 @@ process tb_markDup_v3_cram {
 
 process tb_cram_bam {
 
-    publishDir "${caseID}/${params.outdir}/cram_TN_symlinks/", mode: 'link', pattern: '*.symedit*'
+   // publishDir "${caseID}/${params.outdir}/cram_TN_symlinks/", mode: 'link', pattern: '*.symedit*'
     input:
     tuple val(caseID), val(sampleID), path(cram), path(crai),val(type)
 
