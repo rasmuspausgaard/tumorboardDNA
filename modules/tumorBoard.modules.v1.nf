@@ -228,7 +228,8 @@ process inputFiles_symlinks_cram{
 
     tuple val(caseID), val(sampleID), path(cram), path(crai),val(type)    
     output:
-    tuple path(cram),path(crai)
+    path("${sampleID}.${type}.${params.genome}.${genome_version}.BWA.MD.symedit.cram")
+    path("${sampleID}.${type}.${params.genome}.${genome_version}.BWA.MD.symedit.cram.crai")
     script:
     """
     mv ${cram} ${sampleID}.${type}.${params.genome}.${genome_version}.BWA.MD.symedit.cram
