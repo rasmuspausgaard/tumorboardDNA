@@ -31,11 +31,11 @@ runtype = "TN_WES"
 
 switch (params.server) {
     case 'lnx01':
-        modules_dir="/home/mmaj/scripts_lnx01/nextflow_lnx01/dsl2/modules";
+     //   modules_dir="/home/mmaj/scripts_lnx01/nextflow_lnx01/dsl2/modules";
         dataArchive="/lnx01_data2/shared/dataArchive";        
     break;
     case 'kga01':
-        modules_dir="/home/mmaj/LNX01_mmaj/scripts_lnx01/nextflow_lnx01/dsl2/modules";
+      //  modules_dir="/home/mmaj/LNX01_mmaj/scripts_lnx01/nextflow_lnx01/dsl2/modules";
         dataArchive="/data/shared/dataArchive";
     break;
 }
@@ -264,7 +264,7 @@ include {
          tb_haplotypecaller;
          SUB_DNA_PREPROCESS;
          SUB_DNA_QC;
-         SUB_DNA_TUMOR_NORMAL } from "${modules_dir}/tumorBoard.modules.v1.nf" 
+         SUB_DNA_TUMOR_NORMAL } from "./modules/tumorBoard.modules.v1.nf" 
 
 //from "./modules/tumorBoard.modules.v1.nf"
 //"/data/shared/analyseScripts/modules/tumorBoard.modules.v1.nf" 
