@@ -649,12 +649,10 @@ process msisensor {
 
     input: 
     tuple val(caseID), val(sampleID_normal), path(bamN), path(baiN),val(typeN), val(sampleID_tumor),path(bamT), path(baiT),val(typeT)
+
     output:
     path("*_msi*")
-    
-    when:
-    !params.germline_only
-    
+ 
     script:
     """
     msisensor msi \
@@ -664,7 +662,7 @@ process msisensor {
     -o ${caseID}_msi
     """
 }
-
+/*
 process sequenza {
     errorStrategy 'ignore'
     tag "$caseID"
@@ -673,9 +671,6 @@ process sequenza {
     tuple val(caseID), val(sampleID_normal), path(bamN), path(baiN),val(typeN), val(sampleID_tumor),path(bamT), path(baiT),val(typeT)
     output:
     tuple val(caseID), path("${caseID}.seqz.final.gz") 
-    
-    when:
-    !params.germline_only
 
     script:
     """
@@ -699,8 +694,6 @@ process sequenza_R_output {
     output:
     path("sequenza/*")
 
-    when:
-    !params.germline_only
 
     script:
     """
@@ -713,6 +706,51 @@ process sequenza_R_output {
     sequenza.results(sequenza.extract = t1, cp.table = cp, sample.id = "${caseID}", out.dir = "sequenza" )
     """
 }
+*/
+process sequenza_conda {
+    errorStrategy 'ignore'
+    tag "$caseID"
+    
+    input:
+    tuple val(caseID), val(sampleID_normal), path(bamN), path(baiN),val(typeN), val(sampleID_tumor),path(bamT), path(baiT),val(typeT)
+    output:
+    tuple val(caseID), path("${caseID}.seqz.final.gz") 
+    
+    script:
+    """
+    sequenza-utils bam2seqz \
+    -n ${bamN} -t ${bamT} \
+    --fasta ${genome_fasta} \
+    -gc ${sequenza_cg50_wig} \
+    -o ${caseID}.seqz.phase1.gz
+    sequenza-utils seqz_binning --seqz ${caseID}.seqz.phase1.gz \
+    -w 50 -o ${caseID}.seqz.final.gz 
+    """
+}
+
+process sequenza_R_output_conda {
+    errorStrategy 'ignore'
+    tag "$caseID"
+    publishDir "${caseID}/${params.outdir}/", mode: 'copy'
+    publishDir "${caseID}/${params.outdir}/tumorBoard_files/", mode: 'copy', pattern: "*_{segments,alternative_fit,genome_view}.{txt,pdf}"
+
+    conda '/lnx01_data3/shared/programmer/miniconda3/envs/sequenzaEnv'
+    input:
+    tuple val(caseID),  path(seqz)
+
+    output:
+    path("sequenza_conda/*")
+
+    script:
+    """
+    #!/usr/bin/env Rscript
+    library(sequenza)
+    t1 = sequenza.extract("${seqz}",verbose=F)
+    cp = sequenza.fit(t1)
+    sequenza.results(sequenza.extract = t1, cp.table = cp, sample.id = "${caseID}", out.dir = "sequenza_conda" )
+    """
+}
+
 
 process pcgr_v103 {
     tag "$caseID"
@@ -724,9 +762,6 @@ process pcgr_v103 {
 
     output:
     path("*.pcgr_acmg.*")
-    
-    when:
-    !params.germline_only
 
     script:
     //tumorsite=${pcgr_tumor} ? "--tumor_site ${pcgr_tumor}" : ""
@@ -777,9 +812,6 @@ process pcgr_v141 {
     output:
     path("*.pcgr_acmg.*")
     
-    when:
-    !params.germline_only
-
     script:
     //tumorsite=${pcgr_tumor} ? "--tumor_site ${pcgr_tumor}" : ""
     """
@@ -856,8 +888,10 @@ workflow SUB_DNA_TUMOR_NORMAL {
     mutect2(tumorNormal_bam_ch)
     strelka2(tumorNormal_bam_ch)
     msisensor(tumorNormal_bam_ch)
-    sequenza(tumorNormal_bam_ch)
-    sequenza_R_output(sequenza.out)
+  //  sequenza(tumorNormal_bam_ch)
+   // sequenza_R_output(sequenza.out)
+    sequenza_conda(tumorNormal_bam_ch)
+    sequenza_R_output_conda(sequenza_conda.out)
     pcgr_v103(mutect2.out.mutect2_tumorPASS.join(caseID_pcgrID))
     pcgr_v141(mutect2.out.mutect2_tumorPASS.join(caseID_pcgrID))
     emit:    
