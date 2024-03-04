@@ -159,7 +159,7 @@ if (params.fastq) {
 
 
 if (!params.cram && !params.fastq && params.fastqInput) {
-    params.reads="${dataArchive}/{lnx01,kga01_novaRuns,tank_kga_external_archive}/**/*{.,-}{EV8}{.,-}*R{1,2}*{fq,fastq}.gz"
+    params.reads="${dataArchive}/{lnx01,lnx02,tank_kga_external_archive}/**/*{.,-}{EV8}{.,-}*R{1,2}*{fq,fastq}.gz"
 }
 
 if (!params.cram && params.fastqInput) {
@@ -192,8 +192,8 @@ if (!params.cram && params.fastqInput) {
 ////////////////// INPUT DATA (CRAM) CHANNELS ///////////////////
 
 if (!params.cram && !params.fastqInput && !params.fastq) {
-    cramfiles="${dataArchive}/{lnx01,kga01_novaRuns,tank_kga_external_archive}/**/*{_,-}{EV8}*.cram"
-    craifiles="${dataArchive}/{lnx01,kga01_novaRuns,tank_kga_external_archive}/**/*{_,-}{EV8}*.crai"
+    cramfiles="${dataArchive}/{lnx01,lnx02,tank_kga_external_archive}/**/*{_,-}{EV8}*.cram"
+    craifiles="${dataArchive}/{lnx01,lnx02,tank_kga_external_archive}/**/*{_,-}{EV8}*.crai"
 }
 
 if (params.cram ) {
