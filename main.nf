@@ -438,7 +438,7 @@ workflow.onComplete {
             Pipeline execution summary
             ---------------------------
             Pipeline completed  : Tumorboard DNA ${samplesheetDate}
-            ${germlineOnly ? "WES blod" : "WES blod og væv"}
+            ${germlineOnly ? "Germline only" : "Paired tumor-normal"}
             Duration            : ${workflow.duration}
             Completed at        : ${workflow.complete}
             Success             : ${workflow.success}
