@@ -411,15 +411,9 @@ process facets_output {
 */
 
 
-To add the requested functionality to the workflow.onComplete block in your script:
 
-Extract the first six numbers from the samplesheet name, which represents the date (assumed to be the prefix of the filename).
-Extract names from the first column of the samplesheet before the first uppercase letter.
-Include the logic for sending an email only if the workflow duration is longer than 20 minutes and the --nomail flag is not set.
-Here's the updated workflow.onComplete block you can add to your script:
-
-
-// Read samplesheet and determine format
+workflow.onComplete {
+    // Read samplesheet and determine format
     def samplesheetLines = new File(params.samplesheet).readLines()
     def numColumns = samplesheetLines[0].tokenize('\t').size()
     def germlineOnly = numColumns == 2 // Assume 'germline only' if there are only two columns
@@ -443,7 +437,7 @@ Here's the updated workflow.onComplete block you can add to your script:
             def body = """\
             Pipeline execution summary
             ---------------------------
-            Pipeline completed  : Tumorboard DNA
+            Pipeline completed  : Tumorboard DNA ${samplesheetDate}
             ${germlineOnly ? "WES blod" : "WES blod og væv"}
             Duration            : ${workflow.duration}
             Completed at        : ${workflow.complete}
@@ -456,9 +450,7 @@ Here's the updated workflow.onComplete block you can add to your script:
 
 
             // Send email using the built-in sendMail function
-            sendMail(to: 'Andreas.Braae.Holmgaard@rsyd.dk,Annabeth.Hogh.Petersen@rsyd.dk,Isabella.Almskou@rsyd.dk,Jesper.Graakjaer@rsyd.dk,Lene.Bjornkjaer@rsyd.dk,Martin.Sokol@rsyd.dk,Mads.Jorgensen@rsyd.dk,Rasmus.Hojrup.Pausgaard@rsyd.dk,Signe.Skou.Tofteng@rsyd.dk', 
-                     subject: 'Pipeline Update', 
-                     body: body)
+            sendMail(to: 'Andreas.Braae.Holmgaard@rsyd.dk,Annabeth.Hogh.Petersen@rsyd.dk,Isabella.Almskou@rsyd.dk,Jesper.Graakjaer@rsyd.dk,Lene.Bjornkjaer@rsyd.dk,Martin.Sokol@rsyd.dk,Mads.Jorgensen@rsyd.dk,Rasmus.Hojrup.Pausgaard@rsyd.dk,Signe.Skou.Tofteng@rsyd.dk', subject: 'Pipeline Update', body: body)
         }
     }
 
