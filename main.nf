@@ -433,7 +433,7 @@ workflow.onComplete {
     }.findAll { it != null } // Filter out nulls, which represent no match found
 
     // Only send email if --nomail is not specified and duration is longer than 20 minutes
-    if (!params.nomail && workflow.duration > 1200000) {
+    if (!params.nomail && workflow.duration > 1200000 && workflow.success) {
         if (System.getenv("USER") in ["raspau", "mmaj"]) {
             
             def workDirMessage = params.keepwork ? "WorkDir             : ${workflow.workDir}" : "WorkDir             : Deleted"
@@ -454,12 +454,12 @@ workflow.onComplete {
 
 
             // Send email using the built-in sendMail function
-            sendMail(to: 'Andreas.Braae.Holmgaard@rsyd.dk,Annabeth.Hogh.Petersen@rsyd.dk,Isabella.Almskou@rsyd.dk,Jesper.Graakjaer@rsyd.dk,Lene.Bjornkjaer@rsyd.dk,Martin.Sokol@rsyd.dk,Mads.Jorgensen@rsyd.dk,Rasmus.Hojrup.Pausgaard@rsyd.dk,Signe.Skou.Tofteng@rsyd.dk', subject: 'Pipeline Update', body: body)
+            sendMail(to: 'Andreas.Braae.Holmgaard@rsyd.dk,Annabeth.Hogh.Petersen@rsyd.dk,Isabella.Almskou@rsyd.dk,Jesper.Graakjaer@rsyd.dk,Lene.Bjornkjaer@rsyd.dk,Martin.Sokol@rsyd.dk,Mads.Jorgensen@rsyd.dk,Rasmus.Hojrup.Pausgaard@rsyd.dk,Signe.Skou.Tofteng@rsyd.dk', subject: 'Tumorboard pipeline Update', body: body)
         }
     }
 
     // Handle deletion of WorkDir based on --keepwork parameter
-    if (!params.keepwork) {
+    if (!params.keepwork && workflow.duration > 1200000 && workflow.success) {
         println("Deleting work directory: ${workflow.workDir}")
         "rm -rf ${workflow.workDir}".execute()
     }
