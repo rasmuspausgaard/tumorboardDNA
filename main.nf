@@ -414,6 +414,15 @@ process facets_output {
 
 */
 
+workflow {
+    if (params.someCondition) { // Adjust this condition based on when you want this analysis to run
+        // Assuming you have a channel prepared with the necessary inputs
+        vcf_split = splitVCF(vcfChannel)
+        vcf_annotated = snpeff(vcf_split.out.vcf_split)
+        tmb_results = CalculateTMB(vcf_annotated.out.vcf_annotated)
+    }
+}
+
 
 
 workflow.onComplete {
@@ -454,7 +463,7 @@ workflow.onComplete {
 
 
             // Send email using the built-in sendMail function
-            sendMail(to: 'Andreas.Braae.Holmgaard@rsyd.dk,Annabeth.Hogh.Petersen@rsyd.dk,Isabella.Almskou@rsyd.dk,Jesper.Graakjaer@rsyd.dk,Lene.Bjornkjaer@rsyd.dk,Martin.Sokol@rsyd.dk,Mads.Jorgensen@rsyd.dk,Rasmus.Hojrup.Pausgaard@rsyd.dk,Signe.Skou.Tofteng@rsyd.dk', subject: 'Tumorboard pipeline Update', body: body)
+            sendMail(to: 'Rasmus.Hojrup.Pausgaard@rsyd.dk', subject: 'Tumorboard pipeline Update', body: body)
         }
     }
 
