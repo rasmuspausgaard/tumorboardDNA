@@ -847,7 +847,68 @@ process pcgr_v141 {
     """
 }
 
+/////////// TMB_BIOINFO_PF_CURIE
 
+process splitVCF {
+    tag "$sampleID"
+    errorStrategy 'ignore'
+    publishDir "${caseID}/${params.outdir}/variants", mode: 'copy'
+    
+    input:
+    tuple val(caseID), val(sampleID), path(vcf), val(ref_genome)
+
+    output:
+    path "${sampleID}.output.vcf", emit: vcf_split
+
+    script:
+    """
+    singularity run -B /data/:/data/,/lnx01_data2/:/lnx01_data2/ /data/shared/programmer/simg/gatk4400.sif gatk SelectVariants \
+    -R ${ref_genome} \
+    -V ${vcf} \
+    -sample-name ${sampleID} -O ${sampleID}.output.vcf
+    """
+}
+
+process snpeff {
+    tag "$sampleID"
+    errorStrategy 'ignore'
+    publishDir "${caseID}/${params.outdir}/variants", mode: 'copy'
+
+    input:
+    path vcf
+
+    output:
+    path "${vcf.baseName}.ann.vcf", emit: vcf_annotated
+
+    script:
+    """
+    java -Xmx8g -jar /lnx01_data2/shared/testdata/snpEff/snpEff.jar GRCh38.86 ${vcf} > ${vcf.baseName}.ann.vcf
+    """
+}
+
+process CalculateTMB {
+    tag "$sampleID"
+    errorStrategy 'ignore'
+    publishDir "${caseID}/${params.outdir}/TMB", mode: 'copy'
+
+    input:
+    path vcf
+
+    output:
+    path "${vcf.baseName}_TMB_results.log", emit: tmb_results
+
+    script:
+    """
+    singularity run -B /data/:/data/,/lnx01_data2/:/lnx01_data2/ /data/shared/programmer/simg/TMB_1.0.0.sif pyTMB.py \
+    --vcf "${vcf}" \
+    --effGenomeSize ${params.eff_genome_size} \
+    --dbConfig /opt/conda/envs/tmb_test/config/snpeff.yml \
+    --varConfig /opt/conda/envs/tmb_test/config/mutect2.yml \
+    --filterNonCoding \
+    --filterSyn \
+    --export > ${vcf.baseName}_TMB_results.log
+    """
+}
 
 /////////// SUBWORKFLOWS
 
@@ -898,3 +959,5 @@ workflow SUB_DNA_TUMOR_NORMAL {
     mutect2_out=mutect2.out.mutect2_vcf
 
 }
+
+
