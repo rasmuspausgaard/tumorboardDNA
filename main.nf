@@ -157,7 +157,7 @@ channel.fromPath(params.samplesheet)
 
 channel.fromPath(params.samplesheet)
     .splitCsv(sep:'\t')
-    .map { row -> tuple(row[0], row[1]+"_EV8")}
+    .map { row -> tuple(row[0], row[1]+"_EV8_BEH")}
     .set { caseID_normalID } // use for Mutect2 --normal
 
 ///////////////// END: SAMPLESHEET CHANNELS ////////////////////////
@@ -166,12 +166,12 @@ channel.fromPath(params.samplesheet)
 ////////////////// INPUT DATA (FASTQ) CHANNELS ///////////////////
 
 if (params.fastq) {
-    params.reads = "${params.fastq}/**{.,-}{EV8}{.,-}*R{1,2}*{fq,fastq}.gz"
+    params.reads = "${params.fastq}/**{.,-}{EV8_BEH}{.,-}*R{1,2}*{fq,fastq}.gz"
 }
 
 
 if (!params.cram && !params.fastq && params.fastqInput) {
-    params.reads="${dataArchive}/{lnx01,lnx02,tank_kga_external_archive}/**/*{.,-}{EV8}{.,-}*R{1,2}*{fq,fastq}.gz"
+    params.reads="${dataArchive}/{lnx01,lnx02,tank_kga_external_archive}/**/*{.,-}{EV8_BEH}{.,-}*R{1,2}*{fq,fastq}.gz"
 }
 
 if (!params.cram && params.fastqInput) {
@@ -183,13 +183,13 @@ if (!params.cram && params.fastqInput) {
     // above sampleID, r1, r2
     normalID_caseID
     .join(read_pairs_ch)
-    .map {tuple(it[1],it[0]+"_EV8",it[2],it[3],"NORMAL")}
+    .map {tuple(it[1],it[0]+"_EV8_BEH",it[2],it[3],"NORMAL")}
     .set { NN1 }
     //above: caseid, NPN_sampletype(NORMAL), normal R1, normal R2
 
     tumorID_caseID
     .join(read_pairs_ch)
-    .map {tuple(it[1],it[0]+"_EV8",it[2],it[3],"TUMOR")}
+    .map {tuple(it[1],it[0]+"_EV8_BEH",it[2],it[3],"TUMOR")}
     .set { CF1 }
     //above: caseid, sampleID, ,R1, R2, type
 
@@ -204,13 +204,13 @@ if (!params.cram && params.fastqInput) {
 ////////////////// INPUT DATA (CRAM) CHANNELS ///////////////////
 
 if (!params.cram && !params.fastqInput && !params.fastq) {
-    cramfiles="${dataArchive}/{lnx01,lnx02,tank_kga_external_archive}/**/*{_,-}{EV8}*.cram"
-    craifiles="${dataArchive}/{lnx01,lnx02,tank_kga_external_archive}/**/*{_,-}{EV8}*.crai"
+    cramfiles="${dataArchive}/{lnx01,lnx02,tank_kga_external_archive}/**/*{_,-}{EV8_BEH}*.cram"
+    craifiles="${dataArchive}/{lnx01,lnx02,tank_kga_external_archive}/**/*{_,-}{EV8_BEH}*.crai"
 }
 
 if (params.cram ) {
-    cramfiles="${params.cram}/*{_,-}{EV8}*.cram"
-    craifiles="${params.cram}/*{_,-}{EV8}*.crai"
+    cramfiles="${params.cram}/*{_,-}{EV8_BEH}*.cram"
+    craifiles="${params.cram}/*{_,-}{EV8_BEH}*.crai"
 }
 
 if (!params.fastqInput) {
@@ -228,15 +228,15 @@ if (!params.fastqInput) {
     // Join with samplesheet:
     normalID_caseID // sampleID normal, caseID
     .join(sampleID_cram).join(sampleID_crai)
-    .map {tuple(it[1],it[0]+"_EV8", it[2],it[3],"NORMAL")}
+    .map {tuple(it[1],it[0]+"_EV8_BEH", it[2],it[3],"NORMAL")}
     .set { cram_normal }
-    //above structure: caseID, NPN_EV8, CRAM, CRAI, NORMAL
+    //above structure: caseID, NPN_EV8_BEH, CRAM, CRAI, NORMAL
     
     tumorID_caseID
     .join(sampleID_cram).join(sampleID_crai)
-    .map {tuple(it[1],it[0]+"_EV8",it[2],it[3],"TUMOR")}
+    .map {tuple(it[1],it[0]+"_EV8_BEH",it[2],it[3],"TUMOR")}
     .set { cram_tumor }
-    //above structure: caseID, NPN_EV8, CRAM, CRAI, TUMOR
+    //above structure: caseID, NPN_EV8_BEH, CRAM, CRAI, TUMOR
     
     cram_normal.concat(cram_tumor)
     .set { case_npn_cram_crai_ch }
