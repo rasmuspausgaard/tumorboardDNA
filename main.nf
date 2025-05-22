@@ -291,8 +291,8 @@ workflow DNA_TUMOR_NORMAL {
     main:
     mutect2(tumorNormal_bam_ch)
     msisensor(tumorNormal_bam_ch)
-    sequenza(tumorNormal_bam_ch)
-    sequenza_R_output(sequenza.out)
+    sequenza_conda(tumorNormal_bam_ch)
+    sequenza_R_output_conda(sequenza.out)
     pcgr_v103(mutect2.out.mutect2_tumorPASS.join(caseID_pcgrID))
     pcgr_v141(mutect2.out.mutect2_tumorPASS.join(caseID_pcgrID))
     emit:    
