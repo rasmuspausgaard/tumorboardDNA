@@ -1,55 +1,65 @@
 #!/usr/bin/env nextflow
 nextflow.enable.dsl = 2
 
-date=new Date().format( 'yyMMdd' )
-user="$USER"
-runID="${date}.${user}"
+date = new Date().format('yyMMdd')
+user = "$USER"
+runID = "${date}.${user}"
 
-
-params.rundir                           ="${launchDir.baseName}" 
-params.gatkTEMP                         ="${launchDir.baseName}/gatkTEMP"
-params.server                           ="lnx01"
-params.genome                           ="hg38" 
-params.outdir                           ="TN_WES_results"
-params.panel                            ="WES_2"    // set ROI to full WES
-params.fastq                            =null
-params.cram                             =null
-params.fastqInput                       =null
-params.help                             =false
-params.pcgr_tumor                       =null
-params.qualimap                         =null
-params.samplesheet                      =null
-params.hg38v1                           =null
-params.hg38v2                           =null
-params.skipQC                           =null
-params.archiveStorage                   =null
-params.keepwork                         =null
-params.nomail                           =null
-params.gatk                             ="new"
-//outdir_full_path= "${launchDir}/${params.outdir}/"
+params.rundir         = "${launchDir.baseName}"
+params.gatkTEMP       = "${launchDir.baseName}/gatkTEMP"
+params.server         = "lnx01"
+params.genome         = "hg38"
+params.outdir         = "TN_WES_results"
+params.panel          = "WES_2"    // set ROI to full WES
+params.fastq          = null
+params.cram           = null
+params.fastqInput     = null
+params.help           = false
+params.pcgr_tumor     = null
+params.qualimap       = null
+params.samplesheet    = null
+params.hg38v1         = null
+params.hg38v2         = null
+params.skipQC         = null
+params.archiveStorage = null
+params.keepwork       = null
+params.nomail         = null
+params.gatk           = "new"
 
 runtype = "TN_WES"
 
-
 switch (params.server) {
     case 'lnx02':
-     //   modules_dir="/home/mmaj/scripts_lnx01/nextflow_lnx01/dsl2/modules";
-        dataArchive="/lnx01_data2/shared/dataArchive";        
-    break;
+        dataArchive = "/lnx01_data2/shared/dataArchive"
+        break
     case 'lnx01':
-     //   modules_dir="/home/mmaj/scripts_lnx01/nextflow_lnx01/dsl2/modules";
-        dataArchive="/lnx01_data2/shared/dataArchive";        
-    break;
+        dataArchive = "/lnx01_data2/shared/dataArchive"
+        break
     case 'kga01':
-      //  modules_dir="/home/mmaj/LNX01_mmaj/scripts_lnx01/nextflow_lnx01/dsl2/modules";
-        dataArchive="/data/shared/dataArchive";
-    break;
+        dataArchive = "/data/shared/dataArchive"
+        break
 }
 
+/*
+ * Extract sample id/key from CRAM/CRAI filenames.
+ * Examples:
+ *   113838452659_EV8.hg38v3.cram      -> sampleName: 113838452659_EV8, sampleKey: 113838452659
+ *   113838452659_EV8.hg38v3.cram.crai -> sampleName: 113838452659_EV8, sampleKey: 113838452659
+ */
+def sampleNameFromCramPath(p) {
+    def n = p.name
+    n = n.replaceFirst(/\.crai$/, '')
+    n = n.replaceFirst(/\.cram$/, '')
+    n = n.replaceFirst(/\.hg38v\d+$/, '')
+    return n
+}
 
+def sampleKeyFromCramPath(p) {
+    return sampleNameFromCramPath(p).tokenize('_').get(0)
+}
 
 def helpMessage() {
-    log.info"""
+    log.info """
 
     Generel info:
     Requires a samplesheet containing 5 columns in specific order (tab separated), without headerline:
@@ -61,7 +71,7 @@ def helpMessage() {
 
     The script will automatically look for fastq or cram files in subfolders at /lnx01_data2/shared/dataArchive/. This location contains read-only access to the data archive. Theres no need to copy or move any input data.
 
-    The user can point to a specific folder containing input data using the --fastq or --cram option. 
+    The user can point to a specific folder containing input data using the --fastq or --cram option.
 
     This is only needed if input data exists outside the data archive (e.g. if data are in personal folders or stored at other KG Vejle servers).
 
@@ -69,15 +79,14 @@ def helpMessage() {
 
     Main options:
       --help                print this help message
-      
+
       --genome              hg19 or hg38
                                 Default: hg38
 
       --outdir              Select which folder to write output to.
                                 Default: TN_WES_results
 
-      --samplesheet         path to case samplesheet. Can contain multiple patients/cases (each case in a separate line). 
-
+      --samplesheet         path to case samplesheet. Can contain multiple patients/cases (each case in a separate line).
 
       --server              Select which server the analysis is performed on (kga01 or lnx01)
                                 Default: lnx01
@@ -87,9 +96,7 @@ def helpMessage() {
 
       --fastqInput          Use Fastq as input, automatically search for relevant fastq files at KG Vejle data archive
 
-
       --skipQC              Do not run QC module
-
 
       --keepwork            keep the workfolder generated by the nextflow script.
                                 Default: not set - removes the Work folder generated by nextflow
@@ -97,165 +104,153 @@ def helpMessage() {
       --nomail              Does not send a mail-message when completing a script
                                 Default: not set - sends mail message if the user is mmaj or raspau and only if the script has been running longer than 20 minutes.
 
-
     """.stripIndent()
 }
+
 if (params.help) exit 0, helpMessage()
 
-
 def errorMessage1() {
+    log.info """
 
-    log.info"""
-
-    USER INPUT ERROR: If no samplesheet is selected, the user needs to point to a folder containing relevant fastq or CRAM files... 
+    USER INPUT ERROR: If no samplesheet is selected, the user needs to point to a folder containing relevant fastq or CRAM files...
     Run the script with the --help parameter to see available options
-    
+
     """.stripIndent()
 }
 
 if (!params.samplesheet && !params.fastq && !params.cram) exit 0, errorMessage1()
 
 def errorMessage2() {
+    log.info """
 
-    log.info"""
-
-    USER INPUT ERROR: Choose either fastq or CRAM as input... Not both. 
+    USER INPUT ERROR: Choose either fastq or CRAM as input... Not both.
     Run the script with the --help parameter to see available options
-    
+
     """.stripIndent()
 }
 
 if (params.fastq && params.cram) exit 0, errorMessage2()
-
 
 ///////////////////////////// SAMPLESHEET CHANNELS /////////////////////////////
 
 // Samplesheet cols (fixed order)
 // 0: CaseID, 1: WES.blood, 2: WES.tumor, 3: RNA tumor, 4: pcgr_tumor_code
 
-////////////////////////////////////////////////////////////////////////////////
-
 channel.fromPath(params.samplesheet)
-    .splitCsv(sep:'\t')
-    .map { row -> tuple(row[1], row[0])}
+    .splitCsv(sep: '\t')
+    .map { row -> tuple(row[1], row[0]) }
     .set { normalID_caseID }
-//above: Normal sampleID (NPN), caseID
+// above: Normal sampleID (NPN), caseID
 
 channel.fromPath(params.samplesheet)
-    .splitCsv(sep:'\t')
-    .map { row -> tuple(row[2], row[0])}
+    .splitCsv(sep: '\t')
+    .map { row -> tuple(row[2], row[0]) }
     .set { tumorID_caseID }
-
-//above: tumor sampleID (NPN), caseID
+// above: tumor sampleID (NPN), caseID
 
 channel.fromPath(params.samplesheet)
-    .splitCsv(sep:'\t')
-    .map { row -> tuple(row[0], row[4])} 
+    .splitCsv(sep: '\t')
+    .map { row -> tuple(row[0], row[4]) }
     .set { caseID_pcgrID }
 
-
-
+// Retained for compatibility if modules/workflows expect it.
+// For CRAM input the actual sample names are now taken from the CRAM filenames.
 channel.fromPath(params.samplesheet)
-    .splitCsv(sep:'\t')
-    .map { row -> tuple(row[0], row[1]+"_EV8_BEH")}
-    .set { caseID_normalID } // use for Mutect2 --normal
-
-///////////////// END: SAMPLESHEET CHANNELS ////////////////////////
-
+    .splitCsv(sep: '\t')
+    .map { row -> tuple(row[0], row[1]) }
+    .set { caseID_normalID }
 
 ////////////////// INPUT DATA (FASTQ) CHANNELS ///////////////////
 
 if (params.fastq) {
-    params.reads = "${params.fastq}/**{.,-}{EV8_BEH}{.,-}*R{1,2}*{fq,fastq}.gz"
+    params.reads = "${params.fastq}/**{.,-}{EV8,EV8_BEH}{.,_,-}*R{1,2}*{fq,fastq}.gz"
 }
 
-
 if (!params.cram && !params.fastq && params.fastqInput) {
-    params.reads="${dataArchive}/{lnx01,lnx02,tank_kga_external_archive}/**/*{.,-}{EV8_BEH}{.,-}*R{1,2}*{fq,fastq}.gz"
+    params.reads = "${dataArchive}/{lnx01,lnx02,tank_kga_external_archive}/**/*{.,-}{EV8,EV8_BEH}{.,_,-}*R{1,2}*{fq,fastq}.gz"
 }
 
 if (!params.cram && params.fastqInput) {
     channel
-    .fromFilePairs(params.reads, checkIfExists: true)
-    .ifEmpty { error "Cannot find any reads matching: ${params.reads}" }
-    .map { it -> [it[0], file(it[1][0]),file(it[1][1])] }
-    .set { read_pairs_ch }
-    // above sampleID, r1, r2
+        .fromFilePairs(params.reads, checkIfExists: true)
+        .ifEmpty { error "Cannot find any reads matching: ${params.reads}" }
+        .map { it -> tuple(it[0], file(it[1][0]), file(it[1][1])) }
+        .set { read_pairs_ch }
+    // above: sampleID, r1, r2
+
     normalID_caseID
-    .join(read_pairs_ch)
-    .map {tuple(it[1],it[0]+"_EV8_BEH",it[2],it[3],"NORMAL")}
-    .set { NN1 }
-    //above: caseid, NPN_sampletype(NORMAL), normal R1, normal R2
+        .join(read_pairs_ch)
+        .map { tuple(it[1], it[0], it[2], it[3], "NORMAL") }
+        .set { NN1 }
+    // above: caseID, sampleID, normal R1, normal R2, type
 
     tumorID_caseID
-    .join(read_pairs_ch)
-    .map {tuple(it[1],it[0]+"_EV8_BEH",it[2],it[3],"TUMOR")}
-    .set { CF1 }
-    //above: caseid, sampleID, ,R1, R2, type
+        .join(read_pairs_ch)
+        .map { tuple(it[1], it[0], it[2], it[3], "TUMOR") }
+        .set { CF1 }
+    // above: caseID, sampleID, tumor R1, tumor R2, type
 
     NN1.concat(CF1)
-    .set { case_fastq_input_ch }
-    //above: NN2 and CF2 in the same channel (same structure as NN2 and CF2)
-
-    //case_fastq_input_ch.view()
-
+        .set { case_fastq_input_ch }
 }
 
 ////////////////// INPUT DATA (CRAM) CHANNELS ///////////////////
 
 if (!params.cram && !params.fastqInput && !params.fastq) {
-    cramfiles="${dataArchive}/{lnx01,lnx02,tank_kga_external_archive}/**/*{_,-}{EV8_BEH}*.cram"
-    craifiles="${dataArchive}/{lnx01,lnx02,tank_kga_external_archive}/**/*{_,-}{EV8_BEH}*.crai"
+    cramfiles = "${dataArchive}/{lnx01,lnx02,tank_kga_external_archive}/**/*.cram"
+    craifiles = "${dataArchive}/{lnx01,lnx02,tank_kga_external_archive}/**/*.crai"
 }
 
-if (params.cram ) {
-    cramfiles="${params.cram}/*{_,-}{EV8_BEH}*.cram"
-    craifiles="${params.cram}/*{_,-}{EV8_BEH}*.crai"
+if (params.cram) {
+    cramfiles = "${params.cram}/*.cram"
+    craifiles = "${params.cram}/*.crai"
 }
 
 if (!params.fastqInput) {
     Channel
-    .fromPath(cramfiles)
-    .map { tuple(it.baseName.tokenize('_').get(0),it) }
-    .set { sampleID_cram }
-    // above: sampleID, sampleCRAM
+        .fromPath(cramfiles, checkIfExists: true)
+        .ifEmpty { error "Cannot find any CRAM files matching: ${cramfiles}" }
+        .map { tuple(sampleKeyFromCramPath(it), it, sampleNameFromCramPath(it)) }
+        .set { sampleID_cram }
+    // above: sampleKey/NPN, CRAM, sampleNameFromFile
+
     Channel
-    .fromPath(craifiles)
-    .map { tuple(it.baseName.tokenize('_').get(0),it) }
-    .set { sampleID_crai }
-    // above: sampleID, sampleCRAI
+        .fromPath(craifiles, checkIfExists: true)
+        .ifEmpty { error "Cannot find any CRAI files matching: ${craifiles}" }
+        .map { tuple(sampleKeyFromCramPath(it), it) }
+        .set { sampleID_crai }
+    // above: sampleKey/NPN, CRAI
 
-    // Join with samplesheet:
-    normalID_caseID // sampleID normal, caseID
-    .join(sampleID_cram).join(sampleID_crai)
-    .map {tuple(it[1],it[0]+"_EV8_BEH", it[2],it[3],"NORMAL")}
-    .set { cram_normal }
-    //above structure: caseID, NPN_EV8_BEH, CRAM, CRAI, NORMAL
-    
+    normalID_caseID
+        .join(sampleID_cram)
+        .join(sampleID_crai)
+        .map { tuple(it[1], it[3], it[2], it[4], "NORMAL") }
+        .set { cram_normal }
+    // above: caseID, sampleNameFromFile, CRAM, CRAI, NORMAL
+
     tumorID_caseID
-    .join(sampleID_cram).join(sampleID_crai)
-    .map {tuple(it[1],it[0]+"_EV8_BEH",it[2],it[3],"TUMOR")}
-    .set { cram_tumor }
-    //above structure: caseID, NPN_EV8_BEH, CRAM, CRAI, TUMOR
-    
+        .join(sampleID_cram)
+        .join(sampleID_crai)
+        .map { tuple(it[1], it[3], it[2], it[4], "TUMOR") }
+        .set { cram_tumor }
+    // above: caseID, sampleNameFromFile, CRAM, CRAI, TUMOR
+
     cram_normal.concat(cram_tumor)
-    .set { case_npn_cram_crai_ch }
-    // caseID, NPN, CRAM, CRAI
+        .set { case_npn_cram_crai_ch }
+    // above: caseID, sampleNameFromFile, CRAM, CRAI, type
 
-     case_npn_cram_crai_ch
-    .filter{it =~ /NORMAL/}
-    .set { normals_ch }
+    case_npn_cram_crai_ch
+        .filter { it[4] == "NORMAL" }
+        .set { normals_ch }
 
-    case_npn_cram_crai_ch 
-    .filter{it =~ /TUMOR/}
-    .set { tumor_ch }
-    
+    case_npn_cram_crai_ch
+        .filter { it[4] == "TUMOR" }
+        .set { tumor_ch }
+
     normals_ch
-    .join(tumor_ch)
-    .set { tumorNormal_cram_ch } 
-
+        .join(tumor_ch)
+        .set { tumorNormal_cram_ch }
 }
-
 
 log.info """\
 
@@ -269,25 +264,19 @@ runtype     : $runtype
 runID       : $date.$user
 """
 
-
- //   {msisensor_input; mutect2_input; sequenza_input; accucopy_input;tumor_normal_bams4;facets_input}
-
-
-include { 
-
-         inputFiles_symlinks_cram;
-         tb_cram_bam;
-         tb_haplotypecaller;
-         SUB_DNA_PREPROCESS;
-         SUB_DNA_QC;
-         SUB_DNA_TUMOR_NORMAL } from "./modules/tumorBoard.modules.v1.nf" 
-
-//from "./modules/tumorBoard.modules.v1.nf"
-//"/data/shared/analyseScripts/modules/tumorBoard.modules.v1.nf" 
+include {
+    inputFiles_symlinks_cram
+    tb_cram_bam
+    tb_haplotypecaller
+    SUB_DNA_PREPROCESS
+    SUB_DNA_QC
+    SUB_DNA_TUMOR_NORMAL
+} from "./modules/tumorBoard.modules.v1.nf"
 
 workflow DNA_TUMOR_NORMAL {
     take:
     tumorNormal_bam_ch
+
     main:
     mutect2(tumorNormal_bam_ch)
     msisensor(tumorNormal_bam_ch)
@@ -295,133 +284,66 @@ workflow DNA_TUMOR_NORMAL {
     sequenza_R_output_conda(sequenza.out)
     pcgr_v103(mutect2.out.mutect2_tumorPASS.join(caseID_pcgrID))
     pcgr_v141(mutect2.out.mutect2_tumorPASS.join(caseID_pcgrID))
-    emit:    
-    mutect2_out=mutect2.out.mutect2_vcf
 
+    emit:
+    mutect2_out = mutect2.out.mutect2_vcf
 }
-
-
 
 workflow {
     if (params.fastqInput || params.fastq) {
-
         SUB_DNA_PREPROCESS(case_fastq_input_ch)
-        
+
         if (!params.skipQC) {
             SUB_DNA_QC(SUB_DNA_PREPROCESS.out.finalBam)
         }
-        
+
         tb_haplotypecaller(SUB_DNA_PREPROCESS.out.finalBam)
 
         SUB_DNA_PREPROCESS.out.finalBam
-        .filter{it =~ /NORMAL/}  
-        .set {normal_ch }
+            .filter { it =~ /NORMAL/ }
+            .set { normal_ch }
 
         SUB_DNA_PREPROCESS.out.finalBam
-        .filter{it =~ /TUMOR/}  
-        .set {tumor_ch }
+            .filter { it =~ /TUMOR/ }
+            .set { tumor_ch }
 
         normal_ch.join(tumor_ch)
-        .set { tumorNormal_bam_ch }
+            .set { tumorNormal_bam_ch }
 
         SUB_DNA_TUMOR_NORMAL(tumorNormal_bam_ch, caseID_pcgrID)
     }
 
     if (!params.fastqInput && !params.fastq) {
         inputFiles_symlinks_cram(case_npn_cram_crai_ch)
-        tb_haplotypecaller(case_npn_cram_crai_ch)  // caseid, npn, cram, crai, type
+        tb_haplotypecaller(case_npn_cram_crai_ch)  // caseID, sampleName, CRAM, CRAI, type
         tb_cram_bam(case_npn_cram_crai_ch)
-        
+
         if (!params.skipQC) {
             SUB_DNA_QC(tb_cram_bam.out.bam)
         }
-        
-        tb_cram_bam.out.bam
-        .filter{it =~ /NORMAL/}
-        .set { bam_normals_ch }
 
         tb_cram_bam.out.bam
-        .filter{it =~ /TUMOR/}
-        .set { bam_tumor_ch }
+            .filter { it =~ /NORMAL/ }
+            .set { bam_normals_ch }
 
-        bam_normals_ch
-        .join(bam_tumor_ch)
-        .set { tumorNormal_bam_ch }   
-        // above structure: tuple val(caseID), val(sampleID_normal), path(bamN), path(baiN),val(typeN), val(sampleID_tumor),path(bamT), path(baiT),val(typeT)
+        tb_cram_bam.out.bam
+            .filter { it =~ /TUMOR/ }
+            .set { bam_tumor_ch }
+
+        bam_normals_ch.join(bam_tumor_ch)
+            .set { tumorNormal_bam_ch }
+        // above structure: tuple val(caseID), val(sampleID_normal), path(bamN), path(baiN), val(typeN), val(sampleID_tumor), path(bamT), path(baiT), val(typeT)
 
         SUB_DNA_TUMOR_NORMAL(tumorNormal_bam_ch, caseID_pcgrID)
     }
 }
-
-/*
-
-
-//------------------------------------------------------------------------//
-//---------------------- Tumor-normal based analysis ---------------------//
-//-----------------------------------------------------------------------//
-
-
-process cfDNA_facets_snp_pileup {
-    errorStrategy 'ignore'
-    tag "$caseID"
-    publishDir "${caseID}/${params.outdir}/facets", mode: 'copy'
-
-    input:
-    tuple val(caseID), val(sampleID_normal), path(bamN), path(baiN), val(sampleID_tumor),path(bamT), path(baiT) from facets_input
-   
-    output:
-    tuple val(caseID), path("*.snp_pileup.gz") into facets_snppileup
-   
-    when:
-    !params.germline_only
-   
-    script:
-    """
-    singularity run -B ${s_bind} ${simgpath}/facetssuite.sif snp-pileup-wrapper.R \
-    -vcf ${dbsnp} \
-    -n ${bamN} \
-    -t ${bamT} \
-    -o ${caseID}.facets
-    """
-}
-
-
-process facets_output {
-    errorStrategy 'ignore'
-    tag "$caseID"
-    publishDir "${caseID}/${params.outdir}/facets", mode: 'copy'
-
-    input:
-    tuple val(caseID), path(facets_pileup) from facets_snppileup
-
-    output:
-    path("${caseID}.facets/*")
-    
-    when:
-    !params.germline_only
-    
-    script:
-    """
-    singularity run -B ${s_bind} ${simgpath}/facetssuite.sif run-facets-wrapper.R \
-    -f ${facets_pileup} \
-    -s ${caseID}.facets \
-    -g ${params.genome} \
-    -e -pc 1000 -c 500
-    """
-}
-
-
-
-*/
-
-
 
 workflow.onComplete {
     // Read samplesheet and determine format
     def samplesheetLines = new File(params.samplesheet).readLines()
     def numColumns = samplesheetLines[0].tokenize('\t').size()
     def germlineOnly = numColumns == 2 // Assume 'germline only' if there are only two columns
-    
+
     // Extract the first six digits from the samplesheet name
     def samplesheetName = new File(params.samplesheet).getName()
     def samplesheetDate = samplesheetName.find(/\d{6}/)
@@ -430,14 +352,13 @@ workflow.onComplete {
     def names = samplesheetLines.collect { line ->
         def match = (line.split('\t')[0] =~ /^[a-z]+/)[0]
         return match ? match : null
-    }.findAll { it != null } // Filter out nulls, which represent no match found
+    }.findAll { it != null }
 
     // Only send email if --nomail is not specified and duration is longer than 20 minutes
     if (!params.nomail && workflow.duration > 1200000 && workflow.success) {
         if (System.getenv("USER") in ["raspau", "mmaj"]) {
-            
             def workDirMessage = params.keepwork ? "WorkDir             : ${workflow.workDir}" : "WorkDir             : Deleted"
-            
+
             def body = """\
             Pipeline execution summary
             ---------------------------
@@ -452,9 +373,11 @@ workflow.onComplete {
             Names               : ${names.join(', ')}
             """.stripIndent()
 
-
-            // Send email using the built-in sendMail function
-            sendMail(to: 'Andreas.Braae.Holmgaard@rsyd.dk,Annabeth.Hogh.Petersen@rsyd.dk,Isabella.Almskou@rsyd.dk,Jesper.Graakjaer@rsyd.dk,Lene.Bjornkjaer@rsyd.dk,Martin.Sokol@rsyd.dk,Mads.Jorgensen@rsyd.dk,Rasmus.Hojrup.Pausgaard@rsyd.dk,Signe.Skou.Tofteng@rsyd.dk', subject: 'Tumorboard pipeline Update', body: body)
+            sendMail(
+                to: 'Andreas.Braae.Holmgaard@rsyd.dk,Annabeth.Hogh.Petersen@rsyd.dk,Isabella.Almskou@rsyd.dk,Rasmus.Hojrup.Pausgaard@rsyd.dk',
+                subject: 'Tumorboard pipeline Update',
+                body: body
+            )
         }
     }
 
